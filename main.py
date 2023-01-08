@@ -19,8 +19,11 @@ COLOR_BLACK = (0, 0, 0)
 # game objects
 BALL_WIDTH = 10
 BALL_HEIGHT = 10
+BALL_MOMENTUM_X = 1
+BALL_MOMENTUM_Y = 1
 PADDLE_WIDTH = 10
 PADDLE_HEIGHT = 50
+PADDLE_MOVEMENT = 10
 PLAYER_STARTING_X = 10
 PLAYER_STARTING_Y = (WINDOW_HEIGHT / 2 - PADDLE_HEIGHT / 2)
 OPPONENT_STARTING_X = (WINDOW_WIDTH - PADDLE_WIDTH - 10)
@@ -50,17 +53,34 @@ class GameObject:
     def initialize(self):
         pygame.draw.rect(screen, color=self.color, rect=[self.x, self.y, self.width, self.height])
 
-    def move(self, x, y):
-        self.x = x
-        self.y = y
-
     def draw(self):
         pygame.draw.rect(screen, color=self.color, rect=[self.x, self.y, self.width, self.height])
 
 
-player = GameObject(PADDLE_WIDTH, PADDLE_HEIGHT, COLOR_BLACK, PLAYER_STARTING_X, PLAYER_STARTING_Y)
-opponent = GameObject(PADDLE_WIDTH, PADDLE_HEIGHT, COLOR_BLACK, OPPONENT_STARTING_X, OPPONENT_STARTING_Y)
-ball = GameObject(BALL_WIDTH, BALL_HEIGHT, COLOR_BLACK, WINDOW_CENTER_X, WINDOW_CENTER_Y)
+class Player(GameObject):
+    def move_up(self):
+        if (self.y - PADDLE_MOVEMENT) > 0:
+            self.y -= PADDLE_MOVEMENT
+
+    def move_down(self):
+        if (self.y + PADDLE_MOVEMENT) < (WINDOW_HEIGHT - PADDLE_HEIGHT):
+            self.y += PADDLE_MOVEMENT
+
+
+class Ball(GameObject):
+    def move(self):
+        # handle collision with paddle
+        # handle goal for player
+        # handle goal for opposition
+
+        # otherwise
+        self.x += BALL_MOMENTUM_X
+        self.y += BALL_MOMENTUM_Y
+
+
+player = Player(PADDLE_WIDTH, PADDLE_HEIGHT, COLOR_BLACK, PLAYER_STARTING_X, PLAYER_STARTING_Y)
+opponent = Player(PADDLE_WIDTH, PADDLE_HEIGHT, COLOR_BLACK, OPPONENT_STARTING_X, OPPONENT_STARTING_Y)
+ball = Ball(BALL_WIDTH, BALL_HEIGHT, COLOR_BLACK, WINDOW_CENTER_X, WINDOW_CENTER_Y)
 
 
 def start_game():
@@ -72,9 +92,13 @@ def start_game():
 
 
 def draw_screen():
-    screen.fill((255, 255, 255))
+    screen.fill(COLOR_WHITE)
+
     player.draw()
+
     opponent.draw()
+
+    ball.move()
     ball.draw()
 
 
@@ -94,9 +118,9 @@ if __name__ == '__main__':
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
-                    player.move(player.x, player.y - 10)
+                    player.move_up()
                 if event.key == pygame.K_DOWN:
-                    player.move(player.x, player.y + 10)
+                    player.move_down()
 
         draw_screen()
         update_screen()
